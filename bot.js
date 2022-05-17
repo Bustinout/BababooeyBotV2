@@ -1,12 +1,14 @@
 const Discord = require('discord.js');
+
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
 
 require('dotenv').config();
 
 //Load custom modules.
 const Bababooey = require('./modules/bababooey');
+const DB = require('./modules/db');
 const Gym = require('./modules/gym');
-const COMMANDS = '<b!gym> - gymmerman.'
+const COMMANDS = '<b!gym> - Big Jim.'
 
 //Connect to DB.
 
@@ -18,7 +20,7 @@ client.on("message", message => {
      if (message.author.username != "BababooeyBotV2") {
           if (message.content.substring(0, 2) == 'b!') {
 
-               // Bababooey.createUser(message.author.username, message.author.id);
+               DB.checkUserExists(message.author.username, message.author.id);
                let args = message.content.substring(2).split(' ');
 
                switch (args[0]) {

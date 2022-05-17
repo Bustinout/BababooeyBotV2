@@ -1,4 +1,10 @@
 const Discord = require('discord.js');
+const DB = require('./db');
+const CONSTANTS = require('./constants');
+
+function getCheer() {
+     return CONSTANTS.CHEERS[Math.floor(Math.random() * CONSTANTS.CHEERS.length)]
+}
 
 function sendMessage(message, title, text, color) {
      let colorV = '';
@@ -24,22 +30,10 @@ function sendMessage(message, title, text, color) {
      message.reply({ embeds: [simpleEmbed] });
 }
 
-function getName(message) {
-     return message.author.username;
-}
-
-function createUser(username, userID) {
-     //create user to sql db
-}
-
 exports.sendMessage = function (message, title, text, color) {
      sendMessage(message, title, text, color);
 };
 
-exports.getName = function (message) {
-     return getName(message);
-};
-
-exports.createUser = function (username, userID) {
-     createUser(username, userID);
+exports.getCheer = function () {
+     return getCheer();
 };
