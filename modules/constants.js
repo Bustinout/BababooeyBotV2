@@ -12,4 +12,5 @@ module.exports = {
      DB_ERROR: DB_ERROR,
      GYM_TITLE: GYM_TITLE,
      CHEERS: CHEERS,
+     ADMIN_USERID: ADMIN_USERID,
 }
