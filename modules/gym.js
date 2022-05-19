@@ -52,7 +52,7 @@ function ChooseWinner(message) {
 }
 
 function ForceEnd(message) {
-     if (message.author.id == process.env.BOT_TOKEN) {
+     if (message.author.id == process.env.ADMIN_USERID) {
           ChooseWinner(message)
      } else {
           Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "You don't have the right, O you don't have the right.", 'red')
