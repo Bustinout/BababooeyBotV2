@@ -1,0 +1,9 @@
+npm install
+npm install discord.js
+
+sudo apt-add-repository -r ppa:certbot/certbot
+sudo apt update
+sudo apt-get update
+curl -s https://deb.nodesource.com/setup_16.x | sudo bash
+sudo apt install nodejs -y
+pm2 start bot.js
