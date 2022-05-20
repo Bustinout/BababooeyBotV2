@@ -182,10 +182,95 @@ function gym_Weakmen(message) {
                const simpleEmbed = new Discord.MessageEmbed()
                     .setTitle(`WEAKMEN OF THE PAST`)
                for (let i = 0; i < res.rowCount; i++) {
-                    simpleEmbed.addField(res.rows[i].description, Bababooey.getMentionFromId(res.rows[i].user_id), false)
+                    simpleEmbed.addField(res.rows[i].description, Bababooey.getMentionFromId(res.rows[i].user_id), false);
                }
                Bababooey.sendEmbed(message, simpleEmbed, 'blue');
+          }
+     });
+}
 
+function gym_AddChampion(description, userId, guildId){
+     query = `INSERT INTO public.gym_champions (description, user_id, guild_id) VALUES('${description}', ${userId}, ${guildId});`
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to add big jim...", 'red');
+          } else {
+               console.log(`Champion ${userId} successfully added.`);
+          }
+     });
+}
+
+function gym_AddWeakman(description, userId, guildId){
+     query = `INSERT INTO public.gym_weakmen (description, user_id, guild_id) VALUES('${description}', ${userId}, ${guildId});`
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to add weakman...", 'red');
+          } else {
+               console.log(`Weakman ${userId} successfully added.`);
+          }
+     });
+}
+
+function gym_CheckMonth(message){
+     query = `SELECT * FROM public.gym_workouts_current WHERE guild_id=${message.guildId} LIMIT 1;`
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+          } else {
+               if (res.rowCount > 0){
+                    date = new Date(res.rows[0].date_created);
+                    currentDate = new Date();
+
+                    if (date.getUTCFullYear() != currentDate.getUTCFullYear() || 
+                         (date.getUTCFullYear() == currentDate.getUTCFullYear() && date.getUTCMonth() != currentDate.getUTCMonth()) ){
+                         description = Bababooey.getYearAndMonthString(date.getUTCFullYear(), date.getUTCMonth());
+                         gym_ChooseWinner(description, message);
+                    }
+               }
+          }
+     });
+}
+
+function gym_ClearCurrent(message){
+     query = `INSERT INTO public.gym_workouts_past SELECT * FROM public.gym_workouts_current WHERE guild_id = ${message.guildId}; DELETE FROM public.gym_workouts_current WHERE guild_id = ${message.guildId};`
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to reset workouts table...", 'red');
+          } else {
+               Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "Workouts have been reset. A new month has begun!", 'green');
+          }
+     });
+     console.log(`Current workouts for ${message.guildId} moved to past workouts table.`);
+}
+
+function gym_ChooseWinner(description, message){
+     query = `SELECT user_id, count(*) FROM public.gym_workouts_current WHERE guild_id = '${message.guildId}' GROUP BY user_id ORDER BY count DESC;`
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to pick winner...", 'red');
+          } else {
+               if (res.rowCount > 0) {
+                    const simpleEmbed = new Discord.MessageEmbed()
+                         .setTitle(CONSTANTS.GYM_TITLE)
+                         .setDescription(`THE RESULTS ARE IN!`)
+
+                    cheer = Bababooey.getCheer().toUpperCase()l
+                    simpleEmbed.addField(`${cheer} THE ${description} BIG JIM IS...`, Bababooey.getMentionFromId(res.rows[0].user_id), false);
+                    gym_AddChampion(description, res.rows[0].user_id, res.rows[0].guild_id);
+
+                    if (res.rowCount > 1){
+                         simpleEmbed.addField(`THE ${description} WEAKMAN IS...`, Bababooey.getMentionFromId(res.rows[res.rowCount-1].user_id), false);
+                         gym_AddWeakman(description, res.rows[res.rowCount-1].user_id, res.rows[res.rowCount-1].guild_id);
+                    }
+                    gym_ClearCurrent(message);
+                    Bababooey.sendEmbed(message, simpleEmbed, 'blue');
+               } else {
+                    Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "There is no winner this month. Weakmen... all of you.", 'blue');
+               }
           }
      });
 }
@@ -220,4 +305,8 @@ exports.gym_Champions = function (message) {
 
 exports.gym_Weakmen = function (message) {
      gym_Weakmen(message);
+}
+
+exports.gym_CheckMonth = function (message) {
+     gym_CheckMonth(message);
 }

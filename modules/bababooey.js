@@ -45,12 +45,15 @@ function sendEmbed(message, embed, color) {
 }
 
 const MONTHS = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]
+function getYearAndMonthString(year, month){
+     return `${year} ${MONTHS[month]}`;
+}
 function getYearAndMonth() {
      dateObj = new Date();
      month = dateObj.getUTCMonth();
      year = dateObj.getUTCFullYear();
 
-     return `${year} ${MONTHS[month]}`;
+     return getYearAndMonthString(year, month);
 }
 
 exports.getMentionFromId = function (id) {
@@ -71,4 +74,7 @@ exports.sendEmbed = function (message, embed, color) {
 
 exports.getYearAndMonth = function () {
      return getYearAndMonth();
+};
+exports.getYearAndMonthString = function (year, month) {
+     return getYearAndMonthString(year, month);
 };

@@ -51,18 +51,8 @@ function ChooseWinner(message) {
      Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "add!", 'green')
 }
 
-function ForceEnd(message) {
-     if (message.author.id == process.env.ADMIN_USERID) {
-          ChooseWinner(message)
-     } else {
-          Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "You don't have the right, O you don't have the right.", 'red')
-     }
-}
-
 function checkMonth(message) {
-     //check if start of new month.
-     //check db table for winner of last month.
-     //ChooseWinner(message)
+     DB.gym_CheckMonth(message);
 }
 
 function helpMessage(message) {
@@ -80,8 +70,13 @@ function helpMessage(message) {
 }
 
 function handleArgs(message, args) {
-     //Check if current month is not the same as last record for channel in DB. Select winner if needed.
+     //Check if current month/year is not the same as last record for channel in DB. Select winner and loser if so.
      checkMonth(message);
+
+     if (message.guildId == undefined){
+          Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, 'You need to be in a channel for the BIG JIM.', 'red');
+          return
+     }
 
      switch (args[1]) {
           //add a workout
@@ -127,10 +122,6 @@ function handleArgs(message, args) {
           //get list of commands
           case 'help':
                helpMessage(message);
-               break;
-
-          case 'end':
-               ForceEnd(message);
                break;
 
           default:
