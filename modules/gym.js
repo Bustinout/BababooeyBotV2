@@ -42,15 +42,6 @@ function weakmen(message) {
      DB.gym_Weakmen(message);
 }
 
-function ChooseWinner(message) {
-     //select winner.
-     //add new record for winner.
-     //add description like 2022 MAR BIG JIM
-     //also add weakmen to record
-
-     Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "add!", 'green')
-}
-
 function checkMonth(message) {
      DB.gym_CheckMonth(message);
 }
@@ -73,7 +64,7 @@ function handleArgs(message, args) {
      //Check if current month/year is not the same as last record for channel in DB. Select winner and loser if so.
      checkMonth(message);
 
-     if (message.guildId == undefined){
+     if (message.guildId == undefined) {
           Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, 'You need to be in a channel for the BIG JIM.', 'red');
           return
      }

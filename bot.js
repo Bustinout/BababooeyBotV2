@@ -8,7 +8,6 @@ require('dotenv').config();
 const Bababooey = require('./modules/bababooey');
 const DB = require('./modules/db');
 const Gym = require('./modules/gym');
-const COMMANDS = '<b!gym> - Big Jim.'
 
 function helpMessage(message) {
      const simpleEmbed = new Discord.MessageEmbed()

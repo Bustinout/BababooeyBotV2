@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const DB = require('./db');
 const CONSTANTS = require('./constants');
 
 function getCheer() {
@@ -45,7 +44,7 @@ function sendEmbed(message, embed, color) {
 }
 
 const MONTHS = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]
-function getYearAndMonthString(year, month){
+function getYearAndMonthString(year, month) {
      return `${year} ${MONTHS[month]}`;
 }
 function getYearAndMonth() {

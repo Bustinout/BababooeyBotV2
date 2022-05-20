@@ -2,6 +2,7 @@ const { Client } = require('pg')
 const Bababooey = require('./bababooey');
 const CONSTANTS = require('./constants');
 const Discord = require('discord.js');
+const { DB_ERROR } = require('./constants');
 
 const client = new Client({
      user: process.env.PGUSER,
@@ -163,8 +164,12 @@ function gym_Champions(message) {
           } else {
                const simpleEmbed = new Discord.MessageEmbed()
                     .setTitle(`BIG JIMS OF THE PAST`)
-               for (let i = 0; i < res.rowCount; i++) {
-                    simpleEmbed.addField(res.rows[i].description, Bababooey.getMentionFromId(res.rows[i].user_id), false)
+               if (res.rowCount == 0) {
+                    simpleEmbed.setDescription("There are no BIG JIMS of the past yet.")
+               } else {
+                    for (let i = 0; i < res.rowCount; i++) {
+                         simpleEmbed.addField(res.rows[i].description, Bababooey.getMentionFromId(res.rows[i].user_id), false)
+                    }
                }
                Bababooey.sendEmbed(message, simpleEmbed, 'blue');
 
@@ -181,15 +186,19 @@ function gym_Weakmen(message) {
           } else {
                const simpleEmbed = new Discord.MessageEmbed()
                     .setTitle(`WEAKMEN OF THE PAST`)
-               for (let i = 0; i < res.rowCount; i++) {
-                    simpleEmbed.addField(res.rows[i].description, Bababooey.getMentionFromId(res.rows[i].user_id), false);
+               if (res.rowCount == 0) {
+                    simpleEmbed.setDescription("There are no weakmen of the past yet.")
+               } else {
+                    for (let i = 0; i < res.rowCount; i++) {
+                         simpleEmbed.addField(res.rows[i].description, Bababooey.getMentionFromId(res.rows[i].user_id), false);
+                    }
                }
                Bababooey.sendEmbed(message, simpleEmbed, 'blue');
           }
      });
 }
 
-function gym_AddChampion(description, userId, guildId){
+function gym_AddChampion(message, description, userId, guildId) {
      query = `INSERT INTO public.gym_champions (description, user_id, guild_id) VALUES('${description}', ${userId}, ${guildId});`
      client.query(query, (err, res) => {
           if (err) {
@@ -201,7 +210,7 @@ function gym_AddChampion(description, userId, guildId){
      });
 }
 
-function gym_AddWeakman(description, userId, guildId){
+function gym_AddWeakman(message, description, userId, guildId) {
      query = `INSERT INTO public.gym_weakmen (description, user_id, guild_id) VALUES('${description}', ${userId}, ${guildId});`
      client.query(query, (err, res) => {
           if (err) {
@@ -213,18 +222,19 @@ function gym_AddWeakman(description, userId, guildId){
      });
 }
 
-function gym_CheckMonth(message){
+function gym_CheckMonth(message) {
      query = `SELECT * FROM public.gym_workouts_current WHERE guild_id=${message.guildId} LIMIT 1;`
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
           } else {
-               if (res.rowCount > 0){
+               if (res.rowCount > 0) {
                     date = new Date(res.rows[0].date_created);
                     currentDate = new Date();
 
-                    if (date.getUTCFullYear() != currentDate.getUTCFullYear() || 
-                         (date.getUTCFullYear() == currentDate.getUTCFullYear() && date.getUTCMonth() != currentDate.getUTCMonth()) ){
+                    if (date.getUTCFullYear() != currentDate.getUTCFullYear() ||
+                         (date.getUTCFullYear() == currentDate.getUTCFullYear() && date.getUTCMonth() != currentDate.getUTCMonth())) {
+                         console.log("yoyoyo")
                          description = Bababooey.getYearAndMonthString(date.getUTCFullYear(), date.getUTCMonth());
                          gym_ChooseWinner(description, message);
                     }
@@ -233,7 +243,7 @@ function gym_CheckMonth(message){
      });
 }
 
-function gym_ClearCurrent(message){
+function gym_ClearCurrent(message) {
      query = `INSERT INTO public.gym_workouts_past SELECT * FROM public.gym_workouts_current WHERE guild_id = ${message.guildId}; DELETE FROM public.gym_workouts_current WHERE guild_id = ${message.guildId};`
      client.query(query, (err, res) => {
           if (err) {
@@ -246,7 +256,7 @@ function gym_ClearCurrent(message){
      console.log(`Current workouts for ${message.guildId} moved to past workouts table.`);
 }
 
-function gym_ChooseWinner(description, message){
+function gym_ChooseWinner(description, message) {
      query = `SELECT user_id, count(*) FROM public.gym_workouts_current WHERE guild_id = '${message.guildId}' GROUP BY user_id ORDER BY count DESC;`
      client.query(query, (err, res) => {
           if (err) {
@@ -258,13 +268,13 @@ function gym_ChooseWinner(description, message){
                          .setTitle(CONSTANTS.GYM_TITLE)
                          .setDescription(`THE RESULTS ARE IN!`)
 
-                    cheer = Bababooey.getCheer().toUpperCase()l
+                    cheer = Bababooey.getCheer().toUpperCase();
                     simpleEmbed.addField(`${cheer} THE ${description} BIG JIM IS...`, Bababooey.getMentionFromId(res.rows[0].user_id), false);
-                    gym_AddChampion(description, res.rows[0].user_id, res.rows[0].guild_id);
+                    gym_AddChampion(message, description, res.rows[0].user_id, message.guildId);
 
-                    if (res.rowCount > 1){
-                         simpleEmbed.addField(`THE ${description} WEAKMAN IS...`, Bababooey.getMentionFromId(res.rows[res.rowCount-1].user_id), false);
-                         gym_AddWeakman(description, res.rows[res.rowCount-1].user_id, res.rows[res.rowCount-1].guild_id);
+                    if (res.rowCount > 1) {
+                         simpleEmbed.addField(`THE ${description} WEAKMAN IS...`, Bababooey.getMentionFromId(res.rows[res.rowCount - 1].user_id), false);
+                         gym_AddWeakman(message, description, res.rows[res.rowCount - 1].user_id, message.guildId);
                     }
                     gym_ClearCurrent(message);
                     Bababooey.sendEmbed(message, simpleEmbed, 'blue');
