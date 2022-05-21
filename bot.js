@@ -25,7 +25,7 @@ client.on("message", message => {
                DB.checkUserExists(message.author.username, message.author.id);
                let args = message.content.substring(2).split(' ');
 
-               switch (args[0]) {
+               switch (args[0].toLowerCase()) {
                     case 'gym':
                          Gym.handleArgs(message, args)
                          break;

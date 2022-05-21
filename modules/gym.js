@@ -5,11 +5,16 @@ const CONSTANTS = require('./constants');
 
 function addWorkout(message) {
      //check there isnt crazy quote formatting
-     quoteCount = (message.content.split('\"').length) - 1
-     if (quoteCount == 2) {
+     if (((message.content.split('\"').length) - 1) == 2) {
           description = message.content.split('\"')[1];
-          DB.gym_AddWorkout(message, description);
-     } else {
+          DB.gym_CheckOneADayAndAdd(message, description);
+     } else if (((message.content.split('“').length) - 1) == 1 && ((message.content.split('”').length) - 1) == 1) {
+          startIndex = message.content.indexOf('“') + 1;
+          endIndex = message.content.indexOf('”');
+          description = message.content.substring(startIndex, endIndex);
+          DB.gym_CheckOneADayAndAdd(message, description);
+     }
+     else {
           Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "Incorrect format!\nShould look like: <b!gym add> \"workout description\"", 'red');
      }
 }
@@ -49,9 +54,9 @@ function checkMonth(message) {
 function helpMessage(message) {
      const simpleEmbed = new Discord.MessageEmbed()
           .setTitle(CONSTANTS.GYM_TITLE + ' COMMANDS')
-     simpleEmbed.addField(`<b!gym add> "workout description"`, `Add a workout.`, false)
+     simpleEmbed.addField(`<b!gym add> "workout description"`, `Add a workout. One a day. Daily reset at 00:00HKT/12:00EST.`, false)
      simpleEmbed.addField(`<b!gym list>`, `List your 10 most recent completed workouts for the month.`, false)
-     simpleEmbed.addField(`<b!gym listAll> "workout description"`, `List all your workouts for the month.`, false)
+     simpleEmbed.addField(`<b!gym listAll>`, `List all your workouts for the month.`, false)
      simpleEmbed.addField(`<b!gym remove> <id>`, `Remove a workout.`, false)
      simpleEmbed.addField(`<b!gym leaderboard>`, `Display this month\'s leaderboard.`, false)
      simpleEmbed.addField(`<b!gym rank>`, `Display your current rank.`, false)
@@ -61,15 +66,15 @@ function helpMessage(message) {
 }
 
 function handleArgs(message, args) {
-     //Check if current month/year is not the same as last record for channel in DB. Select winner and loser if so.
-     checkMonth(message);
-
      if (message.guildId == undefined) {
           Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, 'You need to be in a channel for the BIG JIM.', 'red');
           return
      }
 
-     switch (args[1]) {
+     //Check if current month/year is not the same as last record for channel in DB. Select winner and loser if so.
+     checkMonth(message);
+
+     switch (args[1].toLowerCase()) {
           //add a workout
           case 'add':
                addWorkout(message);
@@ -81,7 +86,7 @@ function handleArgs(message, args) {
                break;
 
           //list your all your workouts for the month
-          case 'listAll':
+          case 'listall':
                listWorkouts(message, true);
                break;
 

@@ -43,6 +43,28 @@ function checkUserExists(username, userID) {
 }
 
 //BIG JIM
+function gym_CheckOneADayAndAdd(message, description) {
+     query = `SELECT * FROM public.gym_workouts_current WHERE guild_id=${message.guildId} and user_id = '${message.author.id}' ORDER BY date_created DESC LIMIT 1;`
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+          } else {
+               if (res.rowCount > 0) {
+                    date = new Date(res.rows[0].date_created);
+                    currentDate = new Date();
+
+                    if (date.getUTCFullYear() == currentDate.getUTCFullYear() &&
+                         date.getUTCMonth() == currentDate.getUTCMonth() &&
+                         date.getDate() == currentDate.getDate()) {
+                         Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "You've already added a workout for the day.", 'red');
+                    } else {
+                         gym_AddWorkout(message, description);
+                    }
+               }
+          }
+     });
+}
+
 function gym_AddWorkout(message, description) {
      query = `INSERT INTO public.gym_workouts_current (description, user_id, guild_id) VALUES('${description}', ${message.author.id}, ${message.guildId});`
      client.query(query, (err, res) => {
@@ -119,7 +141,7 @@ function gym_Leaderboard(message) {
                          .setDescription(`${Bababooey.getYearAndMonth()} RANKING`)
 
                     for (let i = 0; i < res.rowCount; i++) {
-                         simpleEmbed.addField(`RANK ${i + 1}`, Bababooey.getMentionFromId(res.rows[i].user_id), false)
+                         simpleEmbed.addField(`RANK ${i + 1}`, Bababooey.getMentionFromId(res.rows[i].user_id) + ` - ${res.rows[i].count} workout(s)`, false)
                     }
                     Bababooey.sendEmbed(message, simpleEmbed, 'blue');
                } else {
@@ -147,9 +169,9 @@ function gym_Rank(message) {
                if (rank == 0) {
                     Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "You are not ranked... pathetic.", 'blue');
                } else if (rank == 1) {
-                    Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "You are RANK 1! " + Bababooey.getCheer(), 'blue');
+                    Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `You have completed ${res.rowCount} workout(s) this month.\n\n` + "You are RANK 1! " + Bababooey.getCheer(), 'blue');
                } else {
-                    Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `You are RANK ${rank}.`, 'blue');
+                    Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `You have completed ${res.rowCount} workout(s) this month.\n\n` + `You are RANK ${rank}.`, 'blue');
                }
           }
      });
@@ -234,7 +256,6 @@ function gym_CheckMonth(message) {
 
                     if (date.getUTCFullYear() != currentDate.getUTCFullYear() ||
                          (date.getUTCFullYear() == currentDate.getUTCFullYear() && date.getUTCMonth() != currentDate.getUTCMonth())) {
-                         console.log("yoyoyo")
                          description = Bababooey.getYearAndMonthString(date.getUTCFullYear(), date.getUTCMonth());
                          gym_ChooseWinner(description, message);
                     }
@@ -285,16 +306,16 @@ function gym_ChooseWinner(description, message) {
      });
 }
 
-exports.gym_AddWorkout = function (message, description) {
-     return gym_AddWorkout(message, description);
+exports.gym_CheckOneADayAndAdd = function (message, description) {
+     gym_CheckOneADayAndAdd(message, description);
 }
 
 exports.gym_ListWorkouts = function (message, listAll) {
-     return gym_ListWorkouts(message, listAll);
+     gym_ListWorkouts(message, listAll);
 }
 
 exports.gym_RemoveWorkout = function (message, index) {
-     return gym_RemoveWorkout(message, index);
+     gym_RemoveWorkout(message, index);
 }
 
 exports.checkUserExists = function (username, userID) {

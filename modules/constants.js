@@ -5,7 +5,8 @@ const DB_ERROR = 'WHAT...';
 const GYM_TITLE = 'BIG JIM'
 
 const CHEERS = ['Glorious!', 'Unbelievable!', 'Magnificent!', 'What...', 'What.', 'WHAT?', 'Huh?', 'Is that even possible?',
-     'Impossible!', 'Miraculous!', 'Righteous!', 'Ussman!', 'That\'s unreal!', 'Incredible!', 'NANI?', 'Ohja...', 'Inconceivable!'
+     'Impossible!', 'Miraculous!', 'Righteous!', 'Ussman!', 'That\'s unreal!', 'Incredible!', 'NANI?', 'Ohja...', 'Inconceivable!',
+     'Seriously?', 'Workout of the month.', 'Ahhn~', 'Oooowiee!', 'Hng!',
 ];
 
 module.exports = {
