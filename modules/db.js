@@ -79,7 +79,7 @@ function gym_AddWorkout(message, description) {
 }
 
 function gym_ListWorkouts(message, listAll) {
-     query = `SELECT * FROM public.gym_workouts_current WHERE user_id = '${message.author.id}' and guild_id = '${message.guildId}';`
+     query = `SELECT * FROM public.gym_workouts_current WHERE user_id = '${message.author.id}' and guild_id = '${message.guildId}' ORDER BY date_created DESC;`
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
