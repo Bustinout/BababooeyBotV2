@@ -3,6 +3,10 @@ const Bababooey = require('./bababooey');
 const DB = require('./db');
 const CONSTANTS = require('./constants');
 
+function WHAT(message) {
+     Bababooey.sendMessage(message, 'WHAT?', 'For a list of gym commands type <b!gym help>.', 'red');
+}
+
 function addWorkout(message) {
      //check there isnt crazy quote formatting
      if (((message.content.split('\"').length) - 1) == 2) {
@@ -68,11 +72,16 @@ function helpMessage(message) {
 function handleArgs(message, args) {
      if (message.guildId == undefined) {
           Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, 'You need to be in a channel for the BIG JIM.', 'red');
-          return
+          return;
      }
 
      //Check if current month/year is not the same as last record for channel in DB. Select winner and loser if so.
      checkMonth(message);
+
+     if (!args[1]) {
+          WHAT(message);
+          return;
+     }
 
      switch (args[1].toLowerCase()) {
           //add a workout
@@ -121,7 +130,7 @@ function handleArgs(message, args) {
                break;
 
           default:
-               Bababooey.sendMessage(message, 'WHAT?', 'For a list of gym commands type <b!gym help>.', 'red');
+               WHAT(message);
                break;
      }
 }

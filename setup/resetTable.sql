@@ -42,3 +42,10 @@ CREATE TABLE public.users (
 	gold int8 NOT NULL,
 	date_created timestamptz DEFAULT NOW()
 );
+
+DROP TABLE public.channel_blacklist;
+CREATE TABLE public.channel_blacklist (
+	guild_id varchar NULL
+	channel_id varchar NULL,
+	blacklister_user_id varchar NULL
+);

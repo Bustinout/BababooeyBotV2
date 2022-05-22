@@ -42,6 +42,47 @@ function checkUserExists(username, userID) {
      });
 }
 
+function CheckBlacklisted(message, doThing) {
+     query = `SELECT count(*) FROM public.channel_blacklist WHERE guild_id='${message.guildId}' and channel_id = '${message.channelId}';`
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+          } else {
+               if (res.rows[0].count == 0) {
+                    doThing();
+               }
+          }
+     });
+}
+
+function Blacklist(message) {
+     query = `INSERT INTO public.channel_blacklist (guild_id, channel_id, blacklister_user_id) VALUES('${message.guildId}', '${message.channelId}', ${message.author.id});`
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to blacklist channel...", 'red');
+          } else {
+               Bababooey.sendMessage(message, CONSTANTS.TITLE, `Channel blacklisted.`, 'green');
+          }
+     });
+}
+
+function Whitelist(message) {
+     query = `DELETE FROM public.channel_blacklist WHERE guild_id = '${message.guildId}' AND channel_id = '${message.channelId}';`
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to whitelist channel...", 'red');
+          } else {
+               if (res.rowCount != 0) {
+                    Bababooey.sendMessage(message, CONSTANTS.TITLE, `Channel removed from blacklist.`, 'green');
+               } else {
+                    Bababooey.sendMessage(message, CONSTANTS.TITLE, `Channel is not blacklisted.`, 'red');
+               }
+          }
+     });
+}
+
 //BIG JIM
 function gym_CheckOneADayAndAdd(message, description) {
      query = `SELECT * FROM public.gym_workouts_current WHERE guild_id=${message.guildId} and user_id = '${message.author.id}' ORDER BY date_created DESC LIMIT 1;`
@@ -306,38 +347,40 @@ function gym_ChooseWinner(description, message) {
      });
 }
 
+exports.CheckBlacklisted = function (message, doThing) {
+     CheckBlacklisted(message, doThing);
+}
+exports.Blacklist = function (message) {
+     Blacklist(message);
+}
+exports.Whitelist = function (message) {
+     Whitelist(message);
+}
+
 exports.gym_CheckOneADayAndAdd = function (message, description) {
      gym_CheckOneADayAndAdd(message, description);
 }
-
 exports.gym_ListWorkouts = function (message, listAll) {
      gym_ListWorkouts(message, listAll);
 }
-
 exports.gym_RemoveWorkout = function (message, index) {
      gym_RemoveWorkout(message, index);
 }
-
 exports.checkUserExists = function (username, userID) {
      checkUserExists(username, userID);
 }
-
 exports.gym_Leaderboard = function (message) {
      gym_Leaderboard(message);
 }
-
 exports.gym_Rank = function (message) {
      gym_Rank(message);
 }
-
 exports.gym_Champions = function (message) {
      gym_Champions(message);
 }
-
 exports.gym_Weakmen = function (message) {
      gym_Weakmen(message);
 }
-
 exports.gym_CheckMonth = function (message) {
      gym_CheckMonth(message);
 }
