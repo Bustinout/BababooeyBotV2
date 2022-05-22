@@ -6,4 +6,6 @@ sudo apt update
 sudo apt-get update
 curl -s https://deb.nodesource.com/setup_16.x | sudo bash
 sudo apt install nodejs -y
-pm2 start bot.js
+
+pm2 start bot.js --name "BababooeyBotV2"
+pm2 start bot.js --name "BababooeyBotV2 - Dev"

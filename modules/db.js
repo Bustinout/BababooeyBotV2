@@ -2,7 +2,7 @@ const { Client } = require('pg')
 const Bababooey = require('./bababooey');
 const CONSTANTS = require('./constants');
 const Discord = require('discord.js');
-const { DB_ERROR } = require('./constants');
+const { DB_ERROR, DB_ERROR_TITLE } = require('./constants');
 
 const client = new Client({
      user: process.env.PGUSER,
@@ -23,6 +23,7 @@ function addNewUser(username, userID) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                console.log("${username} added to users");
           }
@@ -34,6 +35,7 @@ function checkUserExists(username, userID) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                if (res.rows[0].count == 0) {
                     addNewUser(username, userID);
@@ -47,6 +49,7 @@ function CheckBlacklisted(message, doThing) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                if (res.rows[0].count == 0) {
                     doThing();
@@ -60,7 +63,7 @@ function Blacklist(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to blacklist channel...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                Bababooey.sendMessage(message, CONSTANTS.TITLE, `Channel blacklisted.`, 'green');
           }
@@ -72,7 +75,7 @@ function Whitelist(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to whitelist channel...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                if (res.rowCount != 0) {
                     Bababooey.sendMessage(message, CONSTANTS.TITLE, `Channel removed from blacklist.`, 'green');
@@ -89,6 +92,7 @@ function gym_CheckOneADayAndAdd(message, description) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                if (res.rowCount > 0) {
                     date = new Date(res.rows[0].date_created);
@@ -111,7 +115,7 @@ function gym_AddWorkout(message, description) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to add workout...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                cheer = Bababooey.getCheer();
                Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `\"${description}\" workout added! ${cheer}`, 'green');
@@ -124,7 +128,7 @@ function gym_ListWorkouts(message, listAll) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to get workouts...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                displayCount = 0;
                if (listAll) {
@@ -158,7 +162,7 @@ function gym_RemoveWorkout(message, index) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to add workout...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                if (res.rowCount != 0) {
                     Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `Workout ${index} removed. LIAR!`, 'green');
@@ -174,7 +178,7 @@ function gym_Leaderboard(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to fetch leaderboard...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                if (res.rowCount > 0) {
                     const simpleEmbed = new Discord.MessageEmbed()
@@ -197,7 +201,7 @@ function gym_Rank(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to fetch rank...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                rank = 0;
                for (let i = 0; i < res.rowCount; i++) {
@@ -223,7 +227,7 @@ function gym_Champions(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to fetch champions of the past...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                const simpleEmbed = new Discord.MessageEmbed()
                     .setTitle(`BIG JIMS OF THE PAST`)
@@ -245,7 +249,7 @@ function gym_Weakmen(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to fetch weakmen of the past...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                const simpleEmbed = new Discord.MessageEmbed()
                     .setTitle(`WEAKMEN OF THE PAST`)
@@ -266,7 +270,7 @@ function gym_AddChampion(message, description, userId, guildId) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to add big jim...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                console.log(`Champion ${userId} successfully added.`);
           }
@@ -278,7 +282,7 @@ function gym_AddWeakman(message, description, userId, guildId) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to add weakman...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                console.log(`Weakman ${userId} successfully added.`);
           }
@@ -290,6 +294,7 @@ function gym_CheckMonth(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                if (res.rowCount > 0) {
                     date = new Date(res.rows[0].date_created);
@@ -310,7 +315,7 @@ function gym_ClearCurrent(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to reset workouts table...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "Workouts have been reset. A new month has begun!", 'green');
           }
@@ -323,7 +328,7 @@ function gym_ChooseWinner(description, message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR, "Failed to pick winner...", 'red');
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                if (res.rowCount > 0) {
                     const simpleEmbed = new Discord.MessageEmbed()
