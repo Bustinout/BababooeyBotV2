@@ -1,6 +1,6 @@
 //DB
 const DB_ERROR_TITLE = 'WHAT...';
-const DB_ERROR = 'Failed to access database...';
+const DB_ERROR = 'Failed to access database... try again later.';
 
 
 const TITLE = '';

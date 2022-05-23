@@ -27,13 +27,16 @@ function getMentionFromId(id) {
      return `<@!${id}>`;
 }
 
-function sendMessage(message, title, text, color) {
+function sendMessage(message, title, text, color, footer) {
      let colorV = getColor(color);
      const simpleEmbed = new Discord.MessageEmbed()
           .setColor(colorV)
           .setTitle(title)
           .setDescription(text);
 
+     if (footer != undefined) {
+          simpleEmbed.setFooter(footer);
+     }
      message.reply({ embeds: [simpleEmbed] });
 }
 
@@ -63,8 +66,8 @@ exports.getCheer = function () {
      return getCheer();
 };
 
-exports.sendMessage = function (message, title, text, color) {
-     sendMessage(message, title, text, color);
+exports.sendMessage = function (message, title, text, color, footer) {
+     sendMessage(message, title, text, color, footer);
 };
 
 exports.sendEmbed = function (message, embed, color) {
