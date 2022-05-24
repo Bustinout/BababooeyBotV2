@@ -311,7 +311,7 @@ function clearTable(message) {
 function helpMessage(message) {
      const simpleEmbed = new Discord.MessageEmbed()
           .setTitle(CONSTANTS.GYM_TITLE + ' COMMANDS')
-     simpleEmbed.addField(`<b!gym add> "workout description"`, `Add a workout. One a day. Daily reset at 00:00HKT/12:00EST.`, false)
+     simpleEmbed.addField(`<b!gym add> "workout description"`, `Add a workout. Once a day. Daily reset at 00:00UTC/20:00EST.`, false)
      simpleEmbed.addField(`<b!gym list>`, `List your 10 most recent completed workouts for the month.`, false)
      simpleEmbed.addField(`<b!gym listAll>`, `List all your workouts for the month.`, false)
      simpleEmbed.addField(`<b!gym remove> <id>`, `Remove a workout.`, false)
