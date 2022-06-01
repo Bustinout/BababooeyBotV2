@@ -130,13 +130,12 @@ function leaderboard(message) {
                Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                currentDate = new Date();
-               var nextMonthUTC;
-               if (currentDate.getUTCMonth == 11) {
-                    nextMonthUTC = new Date(currentDate.getUTCFullYear() + 1, 0, 1);
-               } else {
-                    nextMonthUTC = new Date(currentDate.getUTCFullYear(), currentDate.getUTCMonth() + 1, 1);
-               }
-               footer = `Big Jim will be selected after ${nextMonthUTC}`;
+               daysInMonth = new Date(currentDate.getUTCFullYear(), currentDate.getUTCMonth() + 1, 0).getDate();
+
+               days = daysInMonth - currentDate.getDate();
+               hours = 24 - currentDate.getUTCHours();
+               minutes = 60 - currentDate.getUTCMinutes();
+               footer = `Big Jim will be selected after ${days} day(s) ${hours} hour(s) and ${minutes} minute(s)`;
 
                if (res.rowCount > 0) {
                     const simpleEmbed = new Discord.MessageEmbed()
