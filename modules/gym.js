@@ -279,11 +279,11 @@ function chooseWinner(description, message) {
 
                     cheer = Bababooey.getCheer().toUpperCase();
                     simpleEmbed.addField(`${cheer} THE ${description} BIG JIM IS...`, Bababooey.getMentionFromId(res.rows[0].user_id), false);
-                    gym_AddChampion(message, description, res.rows[0].user_id, message.guildId);
+                    addChampion(message, description, res.rows[0].user_id, message.guildId);
 
                     if (res.rowCount > 1) {
                          simpleEmbed.addField(`THE ${description} WEAKMAN IS...`, Bababooey.getMentionFromId(res.rows[res.rowCount - 1].user_id), false);
-                         gym_AddWeakman(message, description, res.rows[res.rowCount - 1].user_id, message.guildId);
+                         addWeakman(message, description, res.rows[res.rowCount - 1].user_id, message.guildId);
                     }
                     clearTable(message);
                     Bababooey.sendEmbed(message, simpleEmbed, 'blue');
