@@ -40,7 +40,7 @@ function checkOneADayAndAdd(message, description) {
 
                          hour = 24 - currentDate.getUTCHours();
                          minutes = 60 - currentDate.getUTCMinutes();
-                         footer = `Delete your last workout or wait ${hour} hour(s) and ${minutes} minute(s) before try again.`;
+                         footer = `Delete your last workout or wait ${hour} hour(s) and ${minutes} minute(s) before trying again.`;
                          Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "You can only add one workout each day.", 'red', footer);
                     } else {
                          addWorkoutToDB(message, description);
@@ -129,6 +129,15 @@ function leaderboard(message) {
                console.log(err.stack);
                Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
+               currentDate = new Date();
+               var nextMonthUTC;
+               if (currentDate.getUTCMonth == 11) {
+                    nextMonthUTC = new Date(currentDate.getUTCFullYear() + 1, 0, 1);
+               } else {
+                    nextMonthUTC = new Date(currentDate.getUTCFullYear(), currentDate.getUTCMonth() + 1, 1);
+               }
+               footer = `Big Jim will be selected after ${nextMonthUTC}`;
+
                if (res.rowCount > 0) {
                     const simpleEmbed = new Discord.MessageEmbed()
                          .setTitle(CONSTANTS.GYM_TITLE)
@@ -137,9 +146,9 @@ function leaderboard(message) {
                     for (let i = 0; i < res.rowCount; i++) {
                          simpleEmbed.addField(`RANK ${i + 1}`, Bababooey.getMentionFromId(res.rows[i].user_id) + ` - ${res.rows[i].count} workout(s)`, false)
                     }
-                    Bababooey.sendEmbed(message, simpleEmbed, 'blue');
+                    Bababooey.sendEmbed(message, simpleEmbed, 'blue', footer);
                } else {
-                    Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "Not a single workout. Weakmen... all of you.", 'blue');
+                    Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "Not a single workout. Weakmen... all of you.", 'blue', footer);
                }
           }
      });

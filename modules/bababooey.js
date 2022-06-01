@@ -40,9 +40,12 @@ function sendMessage(message, title, text, color, footer) {
      message.reply({ embeds: [simpleEmbed] });
 }
 
-function sendEmbed(message, embed, color) {
+function sendEmbed(message, embed, color, footer) {
      let colorV = getColor(color);
      embed.setColor(colorV);
+     if (footer != undefined) {
+          embed.setFooter(footer);
+     }
      message.reply({ embeds: [embed] });
 }
 
@@ -70,8 +73,8 @@ exports.sendMessage = function (message, title, text, color, footer) {
      sendMessage(message, title, text, color, footer);
 };
 
-exports.sendEmbed = function (message, embed, color) {
-     sendEmbed(message, embed, color);
+exports.sendEmbed = function (message, embed, color, footer) {
+     sendEmbed(message, embed, color, footer);
 };
 
 exports.getYearAndMonth = function () {
