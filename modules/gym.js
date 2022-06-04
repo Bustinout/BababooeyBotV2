@@ -22,57 +22,60 @@ function addWorkout(message) {
      }
 }
 
-function amendWorkout(message) {
-     client = DB.getDBClient();
-     query = `SELECT * FROM public.gym_workouts_current WHERE guild_id=${message.guildId} and user_id = '${message.author.id}' ORDER BY date_created DESC LIMIT 1;`
-     client.query(query, (err, res) => {
-          if (err) {
-               console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
-          } else {
-               if (res.rowCount > 0) {
-                    date = new Date(res.rows[0].date_created);
-                    currentDate = new Date();
+function amendWorkout(message, index) {
+     //Get description.
+     var description;
+     if (((message.content.split('\"').length) - 1) == 2) {
+          description = message.content.split('\"')[1];
+     } else if (((message.content.split('“').length) - 1) == 1 && ((message.content.split('”').length) - 1) == 1) {
+          startIndex = message.content.indexOf('“') + 1;
+          endIndex = message.content.indexOf('”');
+          description = message.content.substring(startIndex, endIndex);
+     } else {
+          Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "Incorrect format!\nShould look like: <b!gym amend> <optional_id> \"amended workout description\"", 'red');
+     }
 
-                    if (date.getUTCFullYear() == currentDate.getUTCFullYear() &&
-                         date.getUTCMonth() == currentDate.getUTCMonth() &&
-                         date.getDate() == currentDate.getDate()) {
-
-
-                         if (((message.content.split('\"').length) - 1) == 2) {
-                              description = message.content.split('\"')[1];
-                              deleteAndAdd(message, description, res.rows[0].id);
-                         } else if (((message.content.split('“').length) - 1) == 1 && ((message.content.split('”').length) - 1) == 1) {
-                              startIndex = message.content.indexOf('“') + 1;
-                              endIndex = message.content.indexOf('”');
-                              description = message.content.substring(startIndex, endIndex);
-                              deleteAndAdd(message, description, res.rows[0].id);
-                         } else {
-                              Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "Incorrect format!\nShould look like: <b!gym add> \"workout description\"", 'red');
-                         }
-
-
-
-                    } else {
-                         Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "You can't amend that which doesn't exist... idiot.", 'red');
-                    }
+     //Check if index supplied and handle.
+     if (!isNaN(index)) {
+          amendWorkoutInDB(message, description, index);
+     } else {
+          //If no index provided, check if workout added today and use as index if so.
+          client = DB.getDBClient();
+          query = `SELECT * FROM public.gym_workouts_current WHERE guild_id=${message.guildId} and user_id = '${message.author.id}' ORDER BY date_created DESC LIMIT 1;`
+          client.query(query, (err, res) => {
+               if (err) {
+                    console.log(err.stack);
+                    Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
                } else {
-                    Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "You can't amend that which doesn't exist... idiot.", 'red');
+                    if (res.rowCount > 0) {
+                         date = new Date(res.rows[0].date_created);
+                         currentDate = new Date();
+                         if (date.getUTCFullYear() == currentDate.getUTCFullYear() &&
+                              date.getUTCMonth() == currentDate.getUTCMonth() &&
+                              date.getDate() == currentDate.getDate()) {
+                              amendWorkoutInDB(message, description, res.rows[0].id);
+                         } else {
+                              Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "You don't have a workout to amend today.", 'red');
+                         }
+                    } else {
+                         Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "You don't have workouts to amend... weakman.", 'red');
+                    }
                }
-          }
-     });
+          });
+     }
 }
 
-function deleteAndAdd(message, description, deleteID) {
+function amendWorkoutInDB(message, description, index) {
      client = DB.getDBClient();
-     query = `DELETE FROM public.gym_workouts_current WHERE user_id = '${message.author.id}' AND guild_id = '${message.guildId}' AND id = '${deleteID}'; INSERT INTO public.gym_workouts_current (description, user_id, guild_id) VALUES('${description}', ${message.author.id}, ${message.guildId});`;
+     query = `UPDATE public.gym_workouts_current SET description = '${description}' WHERE user_id = '${message.author.id}' AND guild_id = '${message.guildId}' AND id = ${index};`;
+     console.log(query)
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                cheer = Bababooey.getCheer();
-               Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `Workout amended to \"${description}\"! ${cheer}`, 'green');
+               Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `Workout ${index} amended to \"${description}\". ${cheer}`, 'green');
           }
      });
 }
@@ -83,7 +86,7 @@ function checkOneADayAndAdd(message, description) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                if (res.rowCount > 0) {
                     date = new Date(res.rows[0].date_created);
@@ -113,7 +116,7 @@ function addWorkoutToDB(message, description) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                cheer = Bababooey.getCheer();
                Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `\"${description}\" workout added! ${cheer}`, 'green');
@@ -128,7 +131,7 @@ function listWorkouts(message, listAll) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                displayCount = 0;
                if (listAll) {
@@ -163,7 +166,7 @@ function removeWorkout(message, index) {
           client.query(query, (err, res) => {
                if (err) {
                     console.log(err.stack);
-                    Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+                    Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
                } else {
                     if (res.rowCount != 0) {
                          Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `Workout ${index} removed. LIAR!`, 'green');
@@ -183,7 +186,7 @@ function leaderboard(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                currentDate = new Date();
                daysInMonth = new Date(currentDate.getUTCFullYear(), currentDate.getUTCMonth() + 1, 0).getDate();
@@ -215,7 +218,7 @@ function rank(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                rank = 0;
                for (let i = 0; i < res.rowCount; i++) {
@@ -242,7 +245,7 @@ function champions(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                const simpleEmbed = new Discord.MessageEmbed()
                     .setTitle(`BIG JIMS OF THE PAST`)
@@ -264,7 +267,7 @@ function addChampion(message, description, userId, guildId) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                console.log(`Champion ${userId} successfully added.`);
           }
@@ -277,7 +280,7 @@ function weakmen(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                const simpleEmbed = new Discord.MessageEmbed()
                     .setTitle(`WEAKMEN OF THE PAST`)
@@ -299,7 +302,7 @@ function addWeakman(message, description, userId, guildId) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                console.log(`Weakman ${userId} successfully added.`);
           }
@@ -312,7 +315,7 @@ function checkMonth(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                if (res.rowCount > 0) {
                     date = new Date(res.rows[0].date_created);
@@ -334,7 +337,7 @@ function chooseWinner(description, message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                if (res.rowCount > 0) {
                     const simpleEmbed = new Discord.MessageEmbed()
@@ -364,7 +367,7 @@ function clearTable(message) {
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
                Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "Workouts have been reset. A new month has begun!", 'green');
           }
@@ -376,6 +379,7 @@ function helpMessage(message) {
      const simpleEmbed = new Discord.MessageEmbed()
           .setTitle(CONSTANTS.GYM_TITLE + ' COMMANDS')
      simpleEmbed.addField(`<b!gym add> "workout description"`, `Add a workout. Once a day. Daily reset at 00:00UTC/20:00EST.`, false)
+     simpleEmbed.addField(`<b!gym amend> <optional_id> "new workout description"`, `Amends the specified workout. Amends today's last workout if not specified.`, false)
      simpleEmbed.addField(`<b!gym list>`, `List your 10 most recent completed workouts for the month.`, false)
      simpleEmbed.addField(`<b!gym listAll>`, `List all your workouts for the month.`, false)
      simpleEmbed.addField(`<b!gym remove> <id>`, `Remove a workout.`, false)
@@ -408,7 +412,7 @@ function handleArgs(message, args) {
 
           //amend todays workout
           case 'amend':
-               amendWorkout(message);
+               amendWorkout(message, args[2]);
                break;
 
           //list your 10 most recent workouts for the month
