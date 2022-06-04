@@ -22,6 +22,61 @@ function addWorkout(message) {
      }
 }
 
+function amendWorkout(message) {
+     client = DB.getDBClient();
+     query = `SELECT * FROM public.gym_workouts_current WHERE guild_id=${message.guildId} and user_id = '${message.author.id}' ORDER BY date_created DESC LIMIT 1;`
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+          } else {
+               if (res.rowCount > 0) {
+                    date = new Date(res.rows[0].date_created);
+                    currentDate = new Date();
+
+                    if (date.getUTCFullYear() == currentDate.getUTCFullYear() &&
+                         date.getUTCMonth() == currentDate.getUTCMonth() &&
+                         date.getDate() == currentDate.getDate()) {
+
+
+                         if (((message.content.split('\"').length) - 1) == 2) {
+                              description = message.content.split('\"')[1];
+                              deleteAndAdd(message, description, res.rows[0].id);
+                         } else if (((message.content.split('“').length) - 1) == 1 && ((message.content.split('”').length) - 1) == 1) {
+                              startIndex = message.content.indexOf('“') + 1;
+                              endIndex = message.content.indexOf('”');
+                              description = message.content.substring(startIndex, endIndex);
+                              deleteAndAdd(message, description, res.rows[0].id);
+                         } else {
+                              Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "Incorrect format!\nShould look like: <b!gym add> \"workout description\"", 'red');
+                         }
+
+
+
+                    } else {
+                         Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "You can't amend that which doesn't exist... idiot.", 'red');
+                    }
+               } else {
+                    Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "You can't amend that which doesn't exist... idiot.", 'red');
+               }
+          }
+     });
+}
+
+function deleteAndAdd(message, description, deleteID) {
+     client = DB.getDBClient();
+     query = `DELETE FROM public.gym_workouts_current WHERE user_id = '${message.author.id}' AND guild_id = '${message.guildId}' AND id = '${deleteID}'; INSERT INTO public.gym_workouts_current (description, user_id, guild_id) VALUES('${description}', ${message.author.id}, ${message.guildId});`;
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
+          } else {
+               cheer = Bababooey.getCheer();
+               Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `Workout amended to \"${description}\"! ${cheer}`, 'green');
+          }
+     });
+}
+
 function checkOneADayAndAdd(message, description) {
      client = DB.getDBClient();
      query = `SELECT * FROM public.gym_workouts_current WHERE guild_id=${message.guildId} and user_id = '${message.author.id}' ORDER BY date_created DESC LIMIT 1;`
@@ -65,6 +120,7 @@ function addWorkoutToDB(message, description) {
           }
      });
 }
+
 
 function listWorkouts(message, listAll) {
      client = DB.getDBClient();
@@ -348,6 +404,11 @@ function handleArgs(message, args) {
           //add a workout
           case 'add':
                addWorkout(message);
+               break;
+
+          //amend todays workout
+          case 'amend':
+               amendWorkout(message);
                break;
 
           //list your 10 most recent workouts for the month
