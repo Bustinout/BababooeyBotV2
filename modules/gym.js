@@ -11,12 +11,20 @@ function addWorkout(message) {
      //check there isnt crazy quote formatting
      if (((message.content.split('\"').length) - 1) == 2) {
           description = message.content.split('\"')[1];
-          checkOneADayAndAdd(message, description);
+          if (cooldownConfigMap.has(message.guildId) && cooldownConfigMap.get(message.guildId)) {
+               checkOneADayAndAdd(message, description);
+          } else {
+               addWorkoutToDB(message, description);
+          }
      } else if (((message.content.split('“').length) - 1) == 1 && ((message.content.split('”').length) - 1) == 1) {
           startIndex = message.content.indexOf('“') + 1;
           endIndex = message.content.indexOf('”');
           description = message.content.substring(startIndex, endIndex);
-          checkOneADayAndAdd(message, description);
+          if (cooldownConfigMap.has(message.guildId) && cooldownConfigMap.get(message.guildId)) {
+               checkOneADayAndAdd(message, description);
+          } else {
+               addWorkoutToDB(message, description);
+          }
      } else {
           Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, "Incorrect format!\nShould look like: <b!gym add> \"workout description\"", 'red');
      }
@@ -391,11 +399,11 @@ function helpMessage(message) {
 }
 
 
-function toggleCooldown(message){
+function toggleCooldown(message) {
      client = DB.getDBClient();
      var query;
      var newValue;
-     if (cooldownConfigMap.has(message.guildId)){
+     if (cooldownConfigMap.has(message.guildId)) {
           newValue = !cooldownConfigMap.get(message.guildId)
           cooldownConfigMap.set(message.guildId, newValue);
           query = `UPDATE public.configs SET config_value = '${String(newValue)}' WHERE guild_id = '${message.guildId}' AND config_name = 'gym_cooldown'`;
@@ -409,7 +417,7 @@ function toggleCooldown(message){
                console.log(err.stack);
                Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
           } else {
-               if (newValue){
+               if (newValue) {
                     Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `Daily workout cooldown enabled.`, 'green');
                } else {
                     Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `Daily workout cooldown disabled.`, 'green');
@@ -420,15 +428,15 @@ function toggleCooldown(message){
 
 cooldownConfigMap = new Map();
 cooldown_default_value = true;
-function LoadDBConfig(){
+function LoadDBConfig() {
      //Set cooldown value.
      client = DB.getDBClient();
-     query = `SELECT * FROM public.configs WHERE module = 'gym' and config_name = 'gym_cooldown';`
+     query = `SELECT * FROM public.configs WHERE config_name = 'gym_cooldown';`
      client.query(query, (err, res) => {
           if (err) {
                console.log(err.stack);
           } else {
-               if (res.rowCount > 0){
+               if (res.rowCount > 0) {
                     cooldownValue = (res.rows[0].config_value == "true");
                     cooldownConfigMap.set(res.rows[0].guild_id, cooldownValue);
                }
@@ -517,6 +525,6 @@ exports.handleArgs = function (message, args) {
      return handleArgs(message, args);
 };
 
-exports.LoadDBConfig = function(){
+exports.LoadDBConfig = function () {
      LoadDBConfig();
 }

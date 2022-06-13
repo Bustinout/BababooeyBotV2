@@ -34,7 +34,7 @@ client.on("message", message => {
                if (args[0].toLowerCase() == 'whitelist') { //no need to check blacklist when whitelisting
                     DB.Whitelist(message);
                } else {
-                    if (!DB.IsBlacklisted(message.channelId)){
+                    if (!DB.IsBlacklisted(message.channelId)) {
                          switch (args[0].toLowerCase()) {
                               case 'gym':
                                    Gym.handleArgs(message, args)

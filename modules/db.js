@@ -45,7 +45,7 @@ function checkUserExists(username, userID) {
 }
 
 BlacklistedChannels = [];
-function LoadDBConfig(){
+function LoadDBConfig() {
      //Set blacklist.
      query = `SELECT * FROM public.channel_blacklist;`
      client.query(query, (err, res) => {
@@ -53,29 +53,15 @@ function LoadDBConfig(){
                console.log(err.stack);
           } else {
                for (let i = 0; i < res.rowCount; i++) {
-                    BlacklistMap.push(res.rows[i].channel_id)
+                    BlacklistedChannels.push(res.rows[i].channel_id)
                }
                console.log("Blacklist loaded.");
           }
      });
 }
 
-function IsBlacklisted(channelID){
+function IsBlacklisted(channelID) {
      return BlacklistedChannels.includes(channelID);
-}
-
-function CheckBlacklisted(message, doThing) {
-     query = `SELECT count(*) FROM public.channel_blacklist WHERE guild_id='${message.guildId}' and channel_id = '${message.channelId}';`
-     client.query(query, (err, res) => {
-          if (err) {
-               console.log(err.stack);
-               Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
-          } else {
-               if (res.rows[0].count == 0) {
-                    doThing();
-               }
-          }
-     });
 }
 
 function Blacklist(message) {
@@ -85,6 +71,7 @@ function Blacklist(message) {
                console.log(err.stack);
                Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
+               BlacklistedChannels.push(message.channelId)
                Bababooey.sendMessage(message, CONSTANTS.TITLE, `Channel blacklisted.`, 'green');
           }
      });
@@ -98,6 +85,9 @@ function Whitelist(message) {
                Bababooey.sendMessage(message, DB_ERROR_TITLE, DB_ERROR, 'red');
           } else {
                if (res.rowCount != 0) {
+                    BlacklistedChannels = BlacklistedChannels.filter(function (x) {
+                         return x !== message.channelId;
+                    });
                     Bababooey.sendMessage(message, CONSTANTS.TITLE, `Channel removed from blacklist.`, 'green');
                } else {
                     Bababooey.sendMessage(message, CONSTANTS.TITLE, `Channel is not blacklisted.`, 'red');
@@ -110,10 +100,7 @@ exports.getDBClient = function () {
      return client;
 }
 
-exports.CheckBlacklisted = function (message, doThing) {
-     CheckBlacklisted(message, doThing);
-}
-exports.IsBlacklisted = function (channelID){
+exports.IsBlacklisted = function (channelID) {
      return IsBlacklisted(channelID)
 }
 exports.Blacklist = function (message) {
@@ -128,6 +115,6 @@ exports.checkUserExists = function (username, userID) {
 exports.PrettyDate = function (timestamp) {
      return PrettyDate(timestamp);
 }
-exports.LoadDBConfig = function(){
+exports.LoadDBConfig = function () {
      LoadDBConfig();
 }
