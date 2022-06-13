@@ -52,7 +52,7 @@ CREATE TABLE public.channel_blacklist (
 
 DROP TABLE public.configs;
 CREATE TABLE public.configs (
-	guild_id varchar NULL
+	guild_id varchar NULL,
 	config_name varchar NULL,
-	config_value varchar NULL,
+	config_value varchar NULL
 );

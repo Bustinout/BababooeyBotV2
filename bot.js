@@ -21,6 +21,7 @@ function helpMessage(message) {
 
 //Load DB configs.
 Gym.LoadDBConfig();
+DB.LoadDBConfig();
 
 client.on("ready", () => {
      console.log(`Logged in as ${client.user.tag}!`)
@@ -33,7 +34,7 @@ client.on("message", message => {
                if (args[0].toLowerCase() == 'whitelist') { //no need to check blacklist when whitelisting
                     DB.Whitelist(message);
                } else {
-                    DB.CheckBlacklisted(message, () => {
+                    if (!DB.IsBlacklisted(message.channelId)) {
                          switch (args[0].toLowerCase()) {
                               case 'gym':
                                    Gym.handleArgs(message, args)
@@ -50,7 +51,7 @@ client.on("message", message => {
                                    Bababooey.sendMessage(message, 'WHAT?', 'For a list of available commands type <b!help>.', 'red');
                                    break;
                          }
-                    })
+                    }
                }
           }
      }
