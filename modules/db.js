@@ -44,6 +44,26 @@ function checkUserExists(username, userID) {
      });
 }
 
+BlacklistedChannels = [];
+function LoadDBConfig(){
+     //Set blacklist.
+     query = `SELECT * FROM public.channel_blacklist;`
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+          } else {
+               for (let i = 0; i < res.rowCount; i++) {
+                    BlacklistMap.push(res.rows[i].channel_id)
+               }
+               console.log("Blacklist loaded.");
+          }
+     });
+}
+
+function IsBlacklisted(channelID){
+     return BlacklistedChannels.includes(channelID);
+}
+
 function CheckBlacklisted(message, doThing) {
      query = `SELECT count(*) FROM public.channel_blacklist WHERE guild_id='${message.guildId}' and channel_id = '${message.channelId}';`
      client.query(query, (err, res) => {
@@ -93,6 +113,9 @@ exports.getDBClient = function () {
 exports.CheckBlacklisted = function (message, doThing) {
      CheckBlacklisted(message, doThing);
 }
+exports.IsBlacklisted = function (channelID){
+     return IsBlacklisted(channelID)
+}
 exports.Blacklist = function (message) {
      Blacklist(message);
 }
@@ -102,7 +125,9 @@ exports.Whitelist = function (message) {
 exports.checkUserExists = function (username, userID) {
      checkUserExists(username, userID);
 }
-
 exports.PrettyDate = function (timestamp) {
      return PrettyDate(timestamp);
+}
+exports.LoadDBConfig = function(){
+     LoadDBConfig();
 }

@@ -432,6 +432,7 @@ function LoadDBConfig(){
                     cooldownValue = (res.rows[0].config_value == "true");
                     cooldownConfigMap.set(res.rows[0].guild_id, cooldownValue);
                }
+               console.log("Gym config loaded.");
           }
      });
 }
