@@ -390,6 +390,52 @@ function helpMessage(message) {
      Bababooey.sendEmbed(message, simpleEmbed, 'blue');
 }
 
+
+function toggleCooldown(message){
+     client = DB.getDBClient();
+     var query;
+     var newValue;
+     if (cooldownConfigMap.has(message.guildId)){
+          newValue = !cooldownConfigMap.get(message.guildId)
+          cooldownConfigMap.set(message.guildId, newValue);
+          query = `UPDATE public.configs SET config_value = '${String(newValue)}' WHERE guild_id = '${message.guildId}' AND config_name = 'gym_cooldown'`;
+     } else {
+          newValue = !cooldown_default_value;
+          cooldownConfigMap.set(message.guildId, newValue);
+          query = `INSERT INTO public.configs (guild_id, config_name, config_value) VALUES('${message.guildId}', 'gym_cooldown', '${String(newValue)}');`
+     }
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+               Bababooey.sendMessage(message, CONSTANTS.DB_ERROR_TITLE, CONSTANTS.DB_ERROR, 'red');
+          } else {
+               if (newValue){
+                    Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `Daily workout cooldown enabled.`, 'green');
+               } else {
+                    Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, `Daily workout cooldown disabled.`, 'green');
+               }
+          }
+     });
+}
+
+cooldownConfigMap = new Map();
+cooldown_default_value = true;
+function LoadDBConfig(){
+     //Set cooldown value.
+     client = DB.getDBClient();
+     query = `SELECT * FROM public.configs WHERE module = 'gym' and config_name = 'gym_cooldown';`
+     client.query(query, (err, res) => {
+          if (err) {
+               console.log(err.stack);
+          } else {
+               if (res.rowCount > 0){
+                    cooldownValue = (res.rows[0].config_value == "true");
+                    cooldownConfigMap.set(res.rows[0].guild_id, cooldownValue);
+               }
+          }
+     });
+}
+
 function handleArgs(message, args) {
      if (message.guildId == undefined) {
           Bababooey.sendMessage(message, CONSTANTS.GYM_TITLE, 'You need to be in a channel for the BIG JIM.', 'red');
@@ -450,6 +496,11 @@ function handleArgs(message, args) {
                weakmen(message);
                break;
 
+          //toggle cooldown
+          case 'cooldown':
+               toggleCooldown(message);
+               break;
+
           //get list of commands
           case 'help':
                helpMessage(message);
@@ -464,3 +515,7 @@ function handleArgs(message, args) {
 exports.handleArgs = function (message, args) {
      return handleArgs(message, args);
 };
+
+exports.LoadDBConfig = function(){
+     LoadDBConfig();
+}

@@ -49,3 +49,10 @@ CREATE TABLE public.channel_blacklist (
 	channel_id varchar NULL,
 	blacklister_user_id varchar NULL
 );
+
+DROP TABLE public.configs;
+CREATE TABLE public.configs (
+	guild_id varchar NULL
+	config_name varchar NULL,
+	config_value varchar NULL,
+);

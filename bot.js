@@ -19,7 +19,8 @@ function helpMessage(message) {
      Bababooey.sendEmbed(message, simpleEmbed, 'blue');
 }
 
-
+//Load DB configs.
+Gym.LoadDBConfig();
 
 client.on("ready", () => {
      console.log(`Logged in as ${client.user.tag}!`)
